@@ -1,5 +1,10 @@
 import { useAppKit } from "@reown/appkit/react";
-import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
+import {
+	ClientOnly,
+	createFileRoute,
+	Link,
+	stripSearchParams,
+} from "@tanstack/react-router";
 import { useStore } from "@tanstack/react-store";
 import { registerExactEvmScheme } from "@x402/evm/exact/client";
 import { wrapFetchWithPayment, x402Client } from "@x402/fetch";
@@ -19,8 +24,37 @@ import { useDonationForm } from "@/hooks/donation-form";
 import { isAddress, isEnsName, resolveEnsName } from "@/lib/ens";
 import { type NetworkKey, SUPPORTED_NETWORKS } from "@/lib/wagmi-config";
 
+// Default values for search params
+const searchDefaults = {
+	network: "base" as const,
+	amount: 300, // $3 in cents
+	message: "",
+};
+
+// Search params schema - defaults applied via .default() for proper type inference
+const searchParamsSchema = z.object({
+	network: z
+		.enum(["base-sepolia", "base", "sepolia", "mainnet"])
+		.default(searchDefaults.network)
+		.catch(searchDefaults.network),
+	amount: z.coerce
+		.number()
+		.min(1)
+		.default(searchDefaults.amount)
+		.catch(searchDefaults.amount),
+	message: z
+		.string()
+		.max(100)
+		.default(searchDefaults.message)
+		.catch(searchDefaults.message),
+});
+
 export const Route = createFileRoute("/donate/$recipient")({
 	component: DonationPage,
+	validateSearch: searchParamsSchema,
+	search: {
+		middlewares: [stripSearchParams(searchDefaults)],
+	},
 	loader: ({ params: { recipient } }) => {
 		const isValidAddress = isAddress(recipient);
 		const isEns = isEnsName(recipient);
@@ -241,6 +275,10 @@ function DonationPageContent({
 	originalRecipient: string;
 }) {
 	const messageInputId = useId();
+	const navigate = Route.useNavigate();
+
+	// Get search params from URL (always has values due to schema defaults)
+	const searchParams = Route.useSearch();
 
 	// Check if this is the creator's donation page
 	const isCreatorPage =
@@ -375,12 +413,12 @@ function DonationPageContent({
 		],
 	);
 
-	// TanStack Form
+	// TanStack Form - initialized from URL search params (schema provides defaults)
 	const form = useDonationForm({
 		defaultValues: {
-			amount: 300, // Default $3
-			network: "base-sepolia" as NetworkKey,
-			message: "",
+			amount: searchParams.amount,
+			network: searchParams.network,
+			message: searchParams.message,
 		},
 		validators: {
 			onSubmit: donationSchema,
@@ -399,7 +437,23 @@ function DonationPageContent({
 		form.store,
 		(state) => state.values.amount as number,
 	);
+	const selectedMessage = useStore(
+		form.store,
+		(state) => state.values.message as string,
+	);
 	const selectedNetworkInfo = SUPPORTED_NETWORKS[selectedNetwork];
+
+	// Sync form changes to URL (stripSearchParams middleware handles removing defaults)
+	useEffect(() => {
+		navigate({
+			search: {
+				network: selectedNetwork,
+				amount: selectedAmount,
+				message: selectedMessage,
+			},
+			replace: true,
+		});
+	}, [selectedNetwork, selectedAmount, selectedMessage, navigate]);
 
 	// Check USDC balance on selected network
 	const { data: balanceData, isLoading: isBalanceLoading } = useReadContract({
@@ -660,17 +714,6 @@ function DonationPageContent({
 							</p>
 						)}
 					</div>
-				</div>
-
-				{/* Decorative coffee beans */}
-				<div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-2 opacity-60">
-					{[0, 1, 2].map((i) => (
-						<div
-							key={i}
-							className="w-3 h-4 bg-amber-900 rounded-full animate-bounce"
-							style={{ animationDelay: `${i * 150}ms` }}
-						/>
-					))}
 				</div>
 			</div>
 		</div>
