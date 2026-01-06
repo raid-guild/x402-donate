@@ -1,5 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Coffee } from "lucide-react";
+import { env } from "@/env";
 import { useHomeForm } from "@/hooks/home-form";
 
 export const Route = createFileRoute("/")({ component: HomePage });
@@ -79,18 +80,31 @@ function HomePage() {
 					</form>
 
 					{/* Footer */}
-					<p className="text-center text-zinc-500 text-xs mt-8">
-						Powered by{" "}
-						<a
-							href="https://x402.org"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-amber-400 hover:text-amber-300 transition-colors"
-						>
-							x402
-						</a>{" "}
-						· Payments on Base
-					</p>
+					<div className="text-center text-zinc-500 text-xs mt-8 space-y-2">
+						<p>
+							Powered by{" "}
+							<a
+								href="https://x402.org"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-amber-400 hover:text-amber-300 transition-colors"
+							>
+								x402
+							</a>{" "}
+							· Payments on Base
+						</p>
+						{env.VITE_CREATOR_ADDRESS && (
+							<p>
+								<Link
+									to="/donate/$recipient"
+									params={{ recipient: env.VITE_CREATOR_ADDRESS }}
+									className="text-amber-400/70 hover:text-amber-300 transition-colors"
+								>
+									Support the app creator
+								</Link>
+							</p>
+						)}
+					</div>
 				</div>
 			</div>
 		</div>

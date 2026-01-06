@@ -14,6 +14,7 @@ import {
 } from "wagmi";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { env } from "@/env";
 import { useDonationForm } from "@/hooks/donation-form";
 import { isAddress, isEnsName, resolveEnsName } from "@/lib/ens";
 import { type NetworkKey, SUPPORTED_NETWORKS } from "@/lib/wagmi-config";
@@ -155,7 +156,13 @@ function DonationPageWithEns({
 		);
 	}
 
-	return <DonationPageContent recipient={resolvedAddress} ensName={ensName} />;
+	return (
+		<DonationPageContent
+			recipient={resolvedAddress}
+			ensName={ensName}
+			originalRecipient={recipient}
+		/>
+	);
 }
 
 // Loading skeleton for SSR
@@ -227,11 +234,18 @@ function DonationPageSkeleton({
 function DonationPageContent({
 	recipient,
 	ensName,
+	originalRecipient,
 }: {
 	recipient: `0x${string}`;
 	ensName?: string;
+	originalRecipient: string;
 }) {
 	const messageInputId = useId();
+
+	// Check if this is the creator's donation page
+	const isCreatorPage =
+		env.VITE_CREATOR_ADDRESS &&
+		originalRecipient.toLowerCase() === env.VITE_CREATOR_ADDRESS.toLowerCase();
 
 	// Wallet state - only works on client
 	const { address, isConnected, chain } = useAccount();
@@ -466,14 +480,27 @@ function DonationPageContent({
 							</a>
 						</p>
 					)}
-					<Button
-						onClick={resetPayment}
-						variant="outline"
-						className="animate-in fade-in duration-300"
+					<div
+						className="flex flex-col gap-3 animate-in fade-in duration-300"
 						style={{ animationDelay: "500ms" }}
 					>
-						Send another coffee
-					</Button>
+						<Button onClick={resetPayment} variant="outline">
+							Send another coffee
+						</Button>
+						{env.VITE_CREATOR_ADDRESS && !isCreatorPage && (
+							<Link
+								to="/donate/$recipient"
+								params={{ recipient: env.VITE_CREATOR_ADDRESS }}
+							>
+								<Button
+									variant="ghost"
+									className="w-full text-emerald-600 hover:text-emerald-500 hover:bg-emerald-50"
+								>
+									Support the app creator ☕
+								</Button>
+							</Link>
+						)}
+					</div>
 				</div>
 			</div>
 		);
@@ -621,6 +648,17 @@ function DonationPageContent({
 								Create your own donate page →
 							</Link>
 						</p>
+						{env.VITE_CREATOR_ADDRESS && !isCreatorPage && (
+							<p>
+								<Link
+									to="/donate/$recipient"
+									params={{ recipient: env.VITE_CREATOR_ADDRESS }}
+									className="text-amber-400/70 hover:text-amber-300 transition-colors"
+								>
+									Support the app creator
+								</Link>
+							</p>
+						)}
 					</div>
 				</div>
 
