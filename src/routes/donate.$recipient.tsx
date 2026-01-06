@@ -19,7 +19,7 @@ import {
 } from "wagmi";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { env } from "@/env";
+import { clientEnv } from "@/env";
 import { useDonationForm } from "@/hooks/donation-form";
 import { isAddress, isEnsName, resolveEnsName } from "@/lib/ens";
 import { type NetworkKey, SUPPORTED_NETWORKS } from "@/lib/wagmi-config";
@@ -352,8 +352,9 @@ function DonationPageContent({
 
 	// Check if this is the creator's donation page
 	const isCreatorPage =
-		env.VITE_CREATOR_ADDRESS &&
-		originalRecipient.toLowerCase() === env.VITE_CREATOR_ADDRESS.toLowerCase();
+		clientEnv.VITE_CREATOR_ADDRESS &&
+		originalRecipient.toLowerCase() ===
+			clientEnv.VITE_CREATOR_ADDRESS.toLowerCase();
 
 	// Wallet state - only works on client
 	const { address, isConnected, chain } = useAccount();
@@ -611,10 +612,10 @@ function DonationPageContent({
 						<Button onClick={resetPayment} variant="outline">
 							Send another coffee
 						</Button>
-						{env.VITE_CREATOR_ADDRESS && !isCreatorPage && (
+						{clientEnv.VITE_CREATOR_ADDRESS && !isCreatorPage && (
 							<Link
 								to="/donate/$recipient"
-								params={{ recipient: env.VITE_CREATOR_ADDRESS }}
+								params={{ recipient: clientEnv.VITE_CREATOR_ADDRESS }}
 							>
 								<Button
 									variant="ghost"
@@ -772,11 +773,11 @@ function DonationPageContent({
 								Create your own donate page →
 							</Link>
 						</p>
-						{env.VITE_CREATOR_ADDRESS && !isCreatorPage && (
+						{clientEnv.VITE_CREATOR_ADDRESS && !isCreatorPage && (
 							<p>
 								<Link
 									to="/donate/$recipient"
-									params={{ recipient: env.VITE_CREATOR_ADDRESS }}
+									params={{ recipient: clientEnv.VITE_CREATOR_ADDRESS }}
 									className="text-amber-400/70 hover:text-amber-300 transition-colors"
 								>
 									Support the app creator

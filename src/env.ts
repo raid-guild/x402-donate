@@ -1,41 +1,20 @@
-import { createEnv } from "@t3-oss/env-core";
-import { z } from "zod";
+import { createServerOnlyFn } from "@tanstack/react-start";
 
-export const env = createEnv({
-	server: {
-		SERVER_URL: z.url().optional(),
-		FACILITATOR_URL: z.url().default("https://x402.org/facilitator"),
-	},
+/**
+ * Server environment variables - only accessible in server functions.
+ * Uses createServerOnlyFn to throw an error if accessed from client.
+ */
+export const getServerEnv = createServerOnlyFn(() => ({
+	FACILITATOR_URL:
+		process.env.FACILITATOR_URL ?? "https://x402.org/facilitator",
+}));
 
-	/**
-	 * The prefix that client-side variables must have. This is enforced both at
-	 * a type-level and at runtime.
-	 */
-	clientPrefix: "VITE_",
-
-	client: {
-		VITE_APP_TITLE: z.string().min(1).optional(),
-		VITE_CREATOR_ADDRESS: z.string().optional(), // .eth or 0x address
-	},
-
-	/**
-	 * What object holds the environment variables at runtime. This is usually
-	 * `process.env` or `import.meta.env`.
-	 */
-	runtimeEnv: import.meta.env,
-
-	/**
-	 * By default, this library will feed the environment variables directly to
-	 * the Zod validator.
-	 *
-	 * This means that if you have an empty string for a value that is supposed
-	 * to be a number (e.g. `PORT=` in a ".env" file), Zod will incorrectly flag
-	 * it as a type mismatch violation. Additionally, if you have an empty string
-	 * for a value that is supposed to be a string with a default value (e.g.
-	 * `DOMAIN=` in an ".env" file), the default value will never be applied.
-	 *
-	 * In order to solve these issues, we recommend that all new projects
-	 * explicitly specify this option as true.
-	 */
-	emptyStringAsUndefined: true,
-});
+/**
+ * Client environment variables - safe to use anywhere.
+ * Must be prefixed with VITE_ to be bundled for client access.
+ */
+export const clientEnv = {
+	VITE_CREATOR_ADDRESS: import.meta.env.VITE_CREATOR_ADDRESS as
+		| string
+		| undefined,
+} as const;

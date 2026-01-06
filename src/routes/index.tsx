@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Coffee } from "lucide-react";
-import { env } from "@/env";
+import { clientEnv } from "@/env";
 import { useHomeForm } from "@/hooks/home-form";
 
 export const Route = createFileRoute("/")({
@@ -121,11 +121,11 @@ function HomePage() {
 							</a>{" "}
 							· Payments on Base
 						</p>
-						{env.VITE_CREATOR_ADDRESS && (
+						{clientEnv.VITE_CREATOR_ADDRESS && (
 							<p>
 								<Link
 									to="/donate/$recipient"
-									params={{ recipient: env.VITE_CREATOR_ADDRESS }}
+									params={{ recipient: clientEnv.VITE_CREATOR_ADDRESS }}
 									className="text-amber-400/70 hover:text-amber-300 transition-colors"
 								>
 									Support the app creator

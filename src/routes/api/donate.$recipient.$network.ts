@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { env } from "@/env";
+import { getServerEnv } from "@/env";
 
 // x402 v2 payment requirements format
 interface PaymentRequirement {
@@ -219,7 +219,7 @@ export const Route = createFileRoute("/api/donate/$recipient/$network")({
 						request.url,
 					);
 
-					const facilitatorUrl = env.FACILITATOR_URL;
+					const facilitatorUrl = getServerEnv().FACILITATOR_URL;
 					console.log("Using facilitator URL:", facilitatorUrl);
 
 					// Step 1: Verify the payment with the facilitator
