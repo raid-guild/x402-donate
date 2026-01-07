@@ -102,7 +102,9 @@ export const Route = createFileRoute("/donate/$recipient")({
 			? `Donate to ${displayName}`
 			: `Donate $${amountDollars} to ${displayName}`;
 
-		const descriptionParts = [`Buy ${displayName} a coffee with crypto via x402.`];
+		const descriptionParts = [
+			`Buy ${displayName} a coffee with crypto via x402.`,
+		];
 		if (!isDefaultAmount) {
 			descriptionParts.push(`Suggested amount: $${amountDollars}.`);
 		}

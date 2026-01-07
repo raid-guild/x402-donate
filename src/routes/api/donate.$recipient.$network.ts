@@ -172,7 +172,9 @@ export const Route = createFileRoute("/api/donate/$recipient/$network")({
 				console.log("Params:", { recipient, network, amountCents });
 				console.log("Headers:");
 				for (const [key, value] of request.headers.entries()) {
-					console.log(`  ${key}: ${value.substring(0, 100)}${value.length > 100 ? "..." : ""}`);
+					console.log(
+						`  ${key}: ${value.substring(0, 100)}${value.length > 100 ? "..." : ""}`,
+					);
 				}
 
 				// Validate network
@@ -209,7 +211,10 @@ export const Route = createFileRoute("/api/donate/$recipient/$network")({
 					console.log("Decoding payment header...");
 					const paymentPayload = JSON.parse(atob(paymentHeader));
 
-					console.log("Received payment payload:", JSON.stringify(paymentPayload, null, 2));
+					console.log(
+						"Received payment payload:",
+						JSON.stringify(paymentPayload, null, 2),
+					);
 
 					// Build payment requirements (must match what was sent in 402)
 					const paymentRequirements = buildPaymentRequirements(
@@ -229,7 +234,10 @@ export const Route = createFileRoute("/api/donate/$recipient/$network")({
 						paymentRequirements: paymentRequirements[0],
 					};
 					console.log("=== Calling /verify ===");
-					console.log("Request body:", JSON.stringify(verifyRequestBody, null, 2));
+					console.log(
+						"Request body:",
+						JSON.stringify(verifyRequestBody, null, 2),
+					);
 
 					const verifyResponse = await fetch(`${facilitatorUrl}/verify`, {
 						method: "POST",
@@ -273,7 +281,10 @@ export const Route = createFileRoute("/api/donate/$recipient/$network")({
 						paymentRequirements: paymentRequirements[0],
 					};
 					console.log("=== Calling /settle ===");
-					console.log("Request body:", JSON.stringify(settleRequestBody, null, 2));
+					console.log(
+						"Request body:",
+						JSON.stringify(settleRequestBody, null, 2),
+					);
 
 					const settleResponse = await fetch(`${facilitatorUrl}/settle`, {
 						method: "POST",

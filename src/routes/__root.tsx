@@ -29,7 +29,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			},
 			{
 				name: "description",
-				content: "Buy someone a coffee with crypto. Create donation links for any Ethereum address or ENS name.",
+				content:
+					"Buy someone a coffee with crypto. Create donation links for any Ethereum address or ENS name.",
 			},
 			// OpenGraph base tags (can be overridden by child routes)
 			{
