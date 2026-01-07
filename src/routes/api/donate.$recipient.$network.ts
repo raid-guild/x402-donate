@@ -166,16 +166,9 @@ export const Route = createFileRoute("/api/donate/$recipient/$network")({
 					10,
 				);
 
-				// Log all headers for debugging
 				console.log("=== Incoming POST request ===");
 				console.log("URL:", request.url);
 				console.log("Params:", { recipient, network, amountCents });
-				console.log("Headers:");
-				for (const [key, value] of request.headers.entries()) {
-					console.log(
-						`  ${key}: ${value.substring(0, 100)}${value.length > 100 ? "..." : ""}`,
-					);
-				}
 
 				// Validate network
 				if (!NETWORK_CONFIG[network]) {
@@ -224,8 +217,12 @@ export const Route = createFileRoute("/api/donate/$recipient/$network")({
 						request.url,
 					);
 
-					const facilitatorUrl = getServerEnv().FACILITATOR_URL;
-					console.log("Using facilitator URL:", facilitatorUrl);
+					const { FACILITATOR_URL, FACILITATOR_API_KEY } = getServerEnv();
+					console.log("Using facilitator URL:", FACILITATOR_URL);
+					console.log(
+						"Using facilitator API key:",
+						FACILITATOR_API_KEY ? "YES" : "NO",
+					);
 
 					// Step 1: Verify the payment with the facilitator
 					const verifyRequestBody = {
@@ -239,11 +236,17 @@ export const Route = createFileRoute("/api/donate/$recipient/$network")({
 						JSON.stringify(verifyRequestBody, null, 2),
 					);
 
-					const verifyResponse = await fetch(`${facilitatorUrl}/verify`, {
+					const headers: HeadersInit = FACILITATOR_API_KEY
+						? {
+								"Content-Type": "application/json",
+								"X-API-KEY": FACILITATOR_API_KEY,
+							}
+						: {
+								"Content-Type": "application/json",
+							};
+					const verifyResponse = await fetch(`${FACILITATOR_URL}/verify`, {
 						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
+						headers,
 						body: JSON.stringify(verifyRequestBody),
 					});
 
@@ -286,11 +289,9 @@ export const Route = createFileRoute("/api/donate/$recipient/$network")({
 						JSON.stringify(settleRequestBody, null, 2),
 					);
 
-					const settleResponse = await fetch(`${facilitatorUrl}/settle`, {
+					const settleResponse = await fetch(`${FACILITATOR_URL}/settle`, {
 						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
+						headers,
 						body: JSON.stringify(settleRequestBody),
 					});
 
